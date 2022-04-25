@@ -12,7 +12,7 @@ This is a summary of projects you will find in this repository.
 
 These projects use the ULX3S board from Radiona labs:
 
-[https://github.com/mkvenkit/learn_fpga/tree/main/ulx3s](https://github.com/mkvenkit/learn_fpga/tree/main/ulx3s)
+[https://github.com/mkvenkit/learn_fpga/tree/main/ecp5_ulx3s](https://github.com/mkvenkit/learn_fpga/tree/main/ecp5_ulx3s)
 
 
 ## Latice iCE40HX1k
