@@ -8,6 +8,13 @@ I think the best way to understand something is to try and build something inter
 
 This is a summary of projects you will find in this repository.
 
+## ULX3S based on Lattice ECP5
+
+These projects use the ULX3S board from Radiona labs:
+
+[https://github.com/mkvenkit/learn_fpga/tree/main/ulx3s](https://github.com/mkvenkit/learn_fpga/tree/main/ulx3s)
+
+
 ## Latice iCE40HX1k
 
 These projects use the Lattice iCE40HX1k and the *icestorm* open source FPGA toolchain.
