@@ -1,4 +1,5 @@
 ![ice40](iceblink40.jpg)
+![fpgas](fpgas.jpg)
 
 # Learn FGPA
 
