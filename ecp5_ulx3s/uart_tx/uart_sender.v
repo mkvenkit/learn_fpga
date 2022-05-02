@@ -72,7 +72,7 @@ always @(posedge clk) begin
     if (!resetn) 
         curr_state <= sIDLE;
     else
-        curr_state <= next_state;
+        curr_state <= next_state;   
 end
 
 
