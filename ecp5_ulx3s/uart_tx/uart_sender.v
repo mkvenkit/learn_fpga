@@ -43,8 +43,11 @@ always @(*) begin
                 next_state = sIDLE;
         end
         sSET_DATA: begin
-            // set next state
-            next_state = sWAIT; 
+            if (data_ready)
+                // set next state
+                next_state = sWAIT; 
+            else
+                next_state = sSET_DATA;
         end 
         sWAIT: begin
             if (cwait < MAX_CYCLES) begin
