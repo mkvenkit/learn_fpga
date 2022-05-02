@@ -41,7 +41,7 @@ initial begin
     // initialise values
     clk = 1'b0;
 
-    data = 8'hab;
+    data = 8'haf;
     
     // reset 
     resetn = 1'b1;

@@ -29,4 +29,5 @@ clean:
 
 .PHONY: prog clean
 
-# To save output: make > out.txt 2>&1   
+# To save output: make > out.txt 2>&1
+

@@ -22,8 +22,8 @@ parameter sWAIT         = 2'b10;
 
 reg [1:0] curr_state;
 reg [1:0] next_state;
-parameter MAX_CYCLES = 8'd8;
-reg [7:0] cwait;
+parameter MAX_CYCLES = 16'd10;
+reg [15:0] cwait;
 reg data_ready;
 
 // next state logic 
@@ -80,14 +80,14 @@ end
 always @ (posedge clk) begin
     // reset regs
     if (!resetn) begin 
-        data <= 8'd0;
+        data <= 8'hcd;
         data_ready <= 1'b0;
-        cwait <= 8'd0;
+        cwait <= 0;
     end
     else begin 
         case (curr_state)
             sIDLE: begin 
-                data <= 8'd0;
+                data <= 8'h00;
                 data_ready <= 1'b0;
                 cwait <= 8'd0;
             end 
