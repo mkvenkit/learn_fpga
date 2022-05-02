@@ -5,6 +5,9 @@
 
 */
 
+// Never forget this!
+`default_nettype none
+
 module uart_sender(
     input clk,
     input resetn,
@@ -18,70 +21,55 @@ parameter sSET_DATA     = 2'b01;
 parameter sWAIT         = 2'b10;
 
 reg [1:0] curr_state;
+reg [1:0] next_state;
 parameter MAX_CYCLES = 8'd8;
 reg [7:0] cwait;
 reg data_ready;
 
 // next state logic 
-always @(posedge clk_25mhz) begin    
-    // reset 
-    if (!resetn) begin
-        // initialize to idle
-        next_state <= sIDLE;
-        // initialize data 
-        data <= 8'd0;
-        // set flag 
-        data_ready <= 1'b0;
-    end
-    else begin
-        
-        case (state)
-            sIDLE: begin
-                // if not busy
-                if (!busy) begin
-                    // next state is TX
-                    next_state <= sTX;
-                    // reset wait cycles
-                    cwait <= 8'd0;
-                end
+always @(*) begin    
+    // initialize to idle
+    next_state = sIDLE;
+    
+    // case 
+    case (curr_state)
+        sIDLE: begin
+            // if not busy
+            if (!busy) begin
+                // next state is set data
+                next_state = sSET_DATA;
             end
-
-            sSET_DATA: begin
-                // set flag     
-                data_ready <= 1'b1;
+            else 
+                next_state = sIDLE;
+        end
+        sSET_DATA: begin
+            // set next state
+            next_state = sWAIT; 
+        end 
+        sWAIT: begin
+            if (cwait < MAX_CYCLES) begin
                 // set next state
-                next_state <= sWAIT; 
-            end 
-
-            sWAIT: begin
-                
-                if (cwait < MAX_CYCLES) begin
-                    // incr cycles
-                    cwait <= cwait + 8'd1;
-                end
-                else begin
-                    // set next state
-                    next_state <= sIDLE;
-                    // reset cycles
-                    cwait <= 8'd0; 
-                end
-
+                next_state = sWAIT; 
             end
-
-            default: 
-        endcase
-
-    end
+            else begin
+                // set next state
+                next_state = sIDLE;
+            end
+        end
+        default: 
+            // set next state
+            next_state = sIDLE;
+    endcase
 end 
 
 
 // state transititon 
-always @(posedge clk_25mhz) begin    
+always @(posedge clk) begin    
     // reset 
     if (!resetn) 
-        state <= sIDLE;
-    else if (bclk_stb)
-        state <= next_state;
+        curr_state <= sIDLE;
+    else
+        curr_state <= next_state;
 end
 
 
@@ -91,41 +79,29 @@ always @ (posedge clk) begin
     if (!resetn) begin 
         data <= 8'd0;
         data_ready <= 1'b0;
-        curr_state <= sIDLE;
         cwait <= 8'd0;
     end
     else begin 
         case (curr_state)
             sIDLE: begin 
-                if (!busy)
-                    // set data 
-                    curr_state <= sSET_DATA;
-                else 
-                    // reset flag
-                    data_ready <= 1'b0;
+                data <= 8'd0;
+                data_ready <= 1'b0;
+                cwait <= 8'd0;
             end 
-
             sSET_DATA: begin 
                 // set data
                 data <= data + 1;
-                // switch to wait curr_state
-                curr_state <= sWAIT;
+                // set flag 
+                data_ready <= 1'b1;
             end
-
             sWAIT: begin 
                 cwait <= cwait + 1;
-                if (cwait == 8'd7) begin 
-                    // set flag to tx
-                    data_ready <= 1'b1;
-                    // go to idle curr_state
-                    curr_state <= sIDLE;
-                    // reset wait
-                    cwait <= 8'd0;
-                end
             end
-
-            default: 
-                curr_state <= sIDLE;
+            default: begin
+                data <= 8'd0;
+                data_ready <= 1'b0;
+                cwait <= 8'd0;                
+            end
         endcase
     end
 end
