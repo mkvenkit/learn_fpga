@@ -53,38 +53,45 @@ reg [1:0] next_state;
 // set busy flag 
 assign busy = (state != sIDLE);
 
+// number of bits (0 to 9) shifted out 
+reg [3:0] nbits;
+
 // Controller Module  
 reg load_data;
-reg tx_done;
+
+wire tx_done;
+assign tx_done = (nbits == 4'd9);
+
 // next state logic 
-always @(posedge clk_25mhz) begin    
+always @(*) begin    
+    // initialize to idle
+    next_state = sIDLE;
+    // set flag
+    load_data = 1'b0;        
 
-    // reset 
-    if (!resetn) begin
-        // initialize to idle
-        next_state <= sIDLE;
-        // set flag
-        load_data <= 1'b0;        
-    end
-    else if (bclk_stb) begin
-        case (state)
-            sIDLE: begin
-                // if flag set  
-                if (start_tx) begin
-                    next_state <= sTX;
-                    load_data <= 1'b1;
-                end
+    case (state)
+        sIDLE: begin
+            // if flag set  
+            if (start_tx) begin
+                next_state = sTX;
+                load_data = 1'b1;
             end
-
-            sTX: begin
-                if (tx_done)
-                    next_state <= sIDLE;
+            else begin
+                next_state = sIDLE;
+                load_data = 1'b0;
             end
+        end
 
-            default: 
-                next_state <= sIDLE;
-        endcase
-    end 
+        sTX: begin
+            if (tx_done)
+                next_state = sIDLE;
+            else
+                next_state = sTX;
+        end
+
+        default: 
+            next_state = sIDLE;
+    endcase
 end 
 
 // state transititon 
@@ -92,7 +99,7 @@ always @(posedge clk_25mhz) begin
     // reset 
     if (!resetn) 
         state <= sIDLE;
-    else if (bclk_stb)
+    else
         state <= next_state;
 end
 
@@ -102,22 +109,19 @@ end
 // start followed by LSB is sent first
 // stop-b7-b6-b5-b4-b3-b2-b1-b0-start 
 reg [9:0] data_sr;
-// number of bits (0 to 9) shifted out 
-reg [3:0] nbits;
+
 
 always @(posedge clk_25mhz) begin    
     // reset 
     if (!resetn) begin
         // reset nbits
         nbits <= 4'd0;
-        // set flag 
-        tx_done <= 1'b0;        
         // init shift reg to 1s
         data_sr <= {10{1'b1}};
         // set tx as high
         tx <= 1'b1;
     end
-    else if (bclk_stb) begin
+    else begin
         case (state)
             sIDLE: begin
                 if (load_data) begin
@@ -125,23 +129,20 @@ always @(posedge clk_25mhz) begin
                     data_sr <= {1'b1, data, 1'b0};
                     // reset nbits
                     nbits <= 4'd0;
-                    // set flag 
-                    tx_done <= 1'b0;             
                 end
             end
 
             sTX: begin
-                if (nbits < 4'd10) begin
-                    // send LSB
-                    tx <= data_sr[0];
-                    // shift 
-                    data_sr <= {1'b1, data_sr[9:1]};
-                    // increment bits
-                    nbits <= nbits + 4'd1;
-                end              
-                else 
-                    // set flag 
-                    tx_done <= 1'b1;
+                if (bclk_stb) begin 
+                    if (nbits < 4'd10) begin
+                        // send LSB
+                        tx <= data_sr[0];
+                        // shift 
+                        data_sr <= {1'b1, data_sr[9:1]};
+                        // increment bits
+                        nbits <= nbits + 4'd1;
+                    end              
+                end
             end
 
             default: 

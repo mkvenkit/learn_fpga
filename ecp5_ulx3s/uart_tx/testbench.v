@@ -12,11 +12,11 @@ module tb();
 
 reg clk;
 reg resetn;
-wire [7:0] data;
+reg [7:0] data;
 wire busy;  
 wire tx;
 
-wire start_tx;
+reg start_tx;
 uart_tx u1 (
     .clk_25mhz(clk),
     .resetn(resetn),
@@ -26,6 +26,7 @@ uart_tx u1 (
     .tx(tx)
 );
 
+/*
 uart_sender us1 (
     .clk(clk),
     .resetn(resetn),
@@ -33,19 +34,23 @@ uart_sender us1 (
     .data(data),
     .data_ready(start_tx)
 );
-
+*/
 
 initial begin
     
     // initialise values
     clk = 1'b0;
+
+    data = 8'hab;
     
     // reset 
     resetn = 1'b1;
-    #5
+    #4
     resetn = 1'b0;
-    #5
+    #4
     resetn = 1'b1;
+
+    start_tx = 1'b1;
 
 end
 

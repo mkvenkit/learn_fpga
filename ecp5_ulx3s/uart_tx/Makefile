@@ -18,7 +18,7 @@ flash: $(PROJ).bit
 	fujprog.exe -j flash $<
 
 sim:
-	iverilog -o tb.out -s tb testbench.v uart_tx.v uart_sender.v
+	iverilog -o tb.out -s tb testbench.v uart_tx.v 
 	vvp tb.out 
 	
 sim-show:
