@@ -60,7 +60,7 @@ reg [3:0] nbits;
 reg load_data;
 
 wire tx_done;
-assign tx_done = (nbits == 4'd11);
+assign tx_done = (nbits == 4'd10);
 
 // next state logic 
 always @(*) begin    
@@ -108,7 +108,7 @@ end
 // data shift reg
 // start followed by LSB is sent first
 // stop(h)-stop(hi)-b7-b6-b5-b4-b3-b2-b1-b0-start(lo)
-reg [10:0] data_sr;
+reg [9:0] data_sr;
 
 
 always @(posedge clk_25mhz) begin    
@@ -117,7 +117,7 @@ always @(posedge clk_25mhz) begin
         // reset nbits
         nbits <= 4'd0;
         // init shift reg to 1s
-        data_sr <= {11{1'b1}};
+        data_sr <= {10{1'b1}};
         // set tx as high
         tx <= 1'b1;
     end
@@ -126,7 +126,7 @@ always @(posedge clk_25mhz) begin
             sIDLE: begin
                 if (load_data) begin
                     // load data to shift register
-                    data_sr <= {2'b11, data, 1'b0};
+                    data_sr <= {1'b1, data, 1'b0};
                     // reset nbits
                     nbits <= 4'd0;
                 end
@@ -134,11 +134,11 @@ always @(posedge clk_25mhz) begin
 
             sTX: begin
                 if (bclk_stb) begin 
-                    if (nbits < 4'd11) begin
+                    if (nbits < 4'd10) begin
                         // send LSB
                         tx <= data_sr[0];
                         // shift 
-                        data_sr <= {1'b1, data_sr[10:1]};
+                        data_sr <= {1'b1, data_sr[9:1]};
                         // increment bits
                         nbits <= nbits + 4'd1;
                     end              
