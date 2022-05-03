@@ -37,18 +37,11 @@ always @(*) begin
             // if not busy
             if (!busy) begin
                 // next state is set data
-                next_state = sSET_DATA;
+                next_state = sWAIT;
             end
             else 
                 next_state = sIDLE;
         end
-        sSET_DATA: begin
-            if (data_ready)
-                // set next state
-                next_state = sWAIT; 
-            else
-                next_state = sSET_DATA;
-        end 
         sWAIT: begin
             if (cwait < MAX_CYCLES) begin
                 // set next state
@@ -56,9 +49,16 @@ always @(*) begin
             end
             else begin
                 // set next state
-                next_state = sIDLE;
+                next_state = sSET_DATA;
             end
         end
+        sSET_DATA: begin
+            if (data_ready)
+                // set next state
+                next_state = sIDLE; 
+            else
+                next_state = sSET_DATA;
+        end 
         default: 
             // set next state
             next_state = sIDLE;
@@ -80,25 +80,28 @@ end
 always @ (posedge clk) begin
     // reset regs
     if (!resetn) begin 
-        data <= 8'hcd;
+        data <= 8'h00;
         data_ready <= 1'b0;
         cwait <= 0;
     end
     else begin 
         case (curr_state)
             sIDLE: begin 
-                data <= 8'h00;
                 data_ready <= 1'b0;
                 cwait <= 8'd0;
             end 
+            sWAIT: begin 
+                if (cwait < MAX_CYCLES) begin
+                    cwait <= cwait + 1;
+                end
+                else begin
+                    // set data
+                    data <= data + 1;
+                end
+            end
             sSET_DATA: begin 
-                // set data
-                data <= data + 1;
                 // set flag 
                 data_ready <= 1'b1;
-            end
-            sWAIT: begin 
-                cwait <= cwait + 1;
             end
             default: begin
                 data <= 8'd0;

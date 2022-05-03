@@ -12,7 +12,7 @@ A Simple UART TX example.
 module top(
   input clk_25mhz,
   input  [6:0] btn,     // BTN_PWRn (btn[0])
-  output TX,      // serial output 
+  output ftdi_rxd,      // serial output 
   output [7:0] led   // LED 
 );
 
@@ -33,7 +33,7 @@ uart_tx uart1(
     .data(data),
     .start_tx(start_tx),
     .busy(busy),
-    .tx(TX)
+    .tx(ftdi_rxd)
 );
 // use sender
 `else // USE_SENDER
@@ -49,7 +49,7 @@ uart_tx uart1(
     .data(data),
     .start_tx(start_tx),
     .busy(busy),
-    .tx(TX)
+    .tx(ftdi_rxd)
 );
 // UART sender 
 uart_sender us1 (
