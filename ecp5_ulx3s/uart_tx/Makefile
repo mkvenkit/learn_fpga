@@ -2,7 +2,7 @@ PROJ=uart_tx
 
 all: $(PROJ).bit
 
-$(PROJ).json: top.v uart_tx.v uart_sender.v
+$(PROJ).json: top.v uart_tx.v
 	yosys -p "synth_ecp5 -top top -json $@" $^
 
 $(PROJ)_out.config: $(PROJ).json
@@ -18,7 +18,7 @@ flash: $(PROJ).bit
 	fujprog.exe -j flash $<
 
 sim:
-	iverilog -o tb.out -s tb testbench.v uart_tx.v uart_sender.v
+	iverilog -o tb.out -s tb testbench.v uart_tx.v
 	vvp tb.out 
 	
 sim-show:

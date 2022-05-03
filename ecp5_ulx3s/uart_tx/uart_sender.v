@@ -13,102 +13,17 @@ module uart_sender(
     input resetn,
     input busy,
     output reg [7:0] data,
-    output data_ready        //
+    output reg data_ready        //
 );
 
-parameter sIDLE         = 2'b00;
-parameter sSET_DATA     = 2'b01;
-parameter sWAIT         = 2'b10;
-
-reg [1:0] curr_state;
-reg [1:0] next_state;
-parameter MAX_CYCLES = 16'd10;
-reg [15:0] cwait;
-reg data_ready;
-
-// next state logic 
-always @(*) begin    
-    // initialize to idle
-    next_state = sIDLE;
-    
-    // case 
-    case (curr_state)
-        sIDLE: begin
-            // if not busy
-            if (!busy) begin
-                // next state is set data
-                next_state = sWAIT;
-            end
-            else 
-                next_state = sIDLE;
-        end
-        sWAIT: begin
-            if (cwait < MAX_CYCLES) begin
-                // set next state
-                next_state = sWAIT; 
-            end
-            else begin
-                // set next state
-                next_state = sSET_DATA;
-            end
-        end
-        sSET_DATA: begin
-            if (data_ready)
-                // set next state
-                next_state = sIDLE; 
-            else
-                next_state = sSET_DATA;
-        end 
-        default: 
-            // set next state
-            next_state = sIDLE;
-    endcase
-end 
-
-
-// state transititon 
-always @(posedge clk) begin    
-    // reset 
-    if (!resetn) 
-        curr_state <= sIDLE;
-    else
-        curr_state <= next_state;   
-end
-
-
-// send data via uart
-always @ (posedge clk) begin
-    // reset regs
-    if (!resetn) begin 
-        data <= 8'h00;
-        data_ready <= 1'b0;
-        cwait <= 0;
+always @(posedge clk) begin
+    if (!resetn) begin
+        data <= 8'd0;
+        data_ready <= 1'b1;
     end
-    else begin 
-        case (curr_state)
-            sIDLE: begin 
-                data_ready <= 1'b0;
-                cwait <= 8'd0;
-            end 
-            sWAIT: begin 
-                if (cwait < MAX_CYCLES) begin
-                    cwait <= cwait + 1;
-                end
-                else begin
-                    // set data
-                    data <= data + 1;
-                end
-            end
-            sSET_DATA: begin 
-                // set flag 
-                data_ready <= 1'b1;
-            end
-            default: begin
-                data <= 8'd0;
-                data_ready <= 1'b0;
-                cwait <= 8'd0;                
-            end
-        endcase
+    else begin
+        if (!busy)
+            data <= data + 1; 
     end
 end
 

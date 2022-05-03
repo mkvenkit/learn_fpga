@@ -19,48 +19,31 @@ module top(
 // reset signal for modules 
 wire resetn = btn[0];
 
-
 // UART signals 
-`define USE_SENDER
-`ifndef USE_SENDER
-wire [7:0] data = 8'hde;
-wire start_tx = 1'b1;
+reg [7:0] data;
+reg data_ready;
 wire busy;
 // UART module 
 uart_tx uart1(
     .clk_25mhz(clk_25mhz),
     .resetn(resetn),
     .data(data),
-    .start_tx(start_tx),
+    .start_tx(data_ready),
     .busy(busy),
     .tx(ftdi_rxd)
 );
-// use sender
-`else // USE_SENDER
 
-wire [7:0] data;
-wire start_tx;
-wire busy;
-
-// UART module 
-uart_tx uart1(
-    .clk_25mhz(clk_25mhz),
-    .resetn(resetn),
-    .data(data),
-    .start_tx(start_tx),
-    .busy(busy),
-    .tx(ftdi_rxd)
-);
-// UART sender 
-uart_sender us1 (
-    .clk(clk_25mhz),
-    .resetn(resetn),
-    .busy(busy),
-    .data(data),
-    .data_ready(start_tx)
-);
-
-`endif // USE_SENDER
+// send data via UART 0..255
+always @(posedge clk_25mhz) begin
+    if (!resetn) begin
+        data <= 8'd0;
+        data_ready <= 1'b1;
+    end
+    else begin
+        if (!busy)
+            data <= data + 1; 
+    end
+end
 
 // LED blink
 reg [22:0] counter;
