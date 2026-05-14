@@ -1,0 +1,23 @@
+# pins.pcf — Pin constraints for iCE40UP5K Breakout EVN board
+#
+# UART (via on-board FTDI USB-to-UART bridge)
+# Check your board schematic — these are typical B-EVN assignments.
+set_io uart_tx  14   # FPGA TX → FTDI RX  (label: TX on board header)
+
+# I2S microphone interface
+# Connect both mics' SCK and WS pins to these FPGA outputs.
+# Bring each mic's DATA pin to its own FPGA input.
+set_io i2s_sck       19   # label 26B — I2S bit clock  out
+set_io i2s_ws        18   # label 25B — I2S word select out
+set_io i2s_sd_left   20   # label 27B — left  mic DATA in  (SELECT pin to GND)
+set_io i2s_sd_right  21   # label 28B — right mic DATA in  (SELECT pin to VDD)
+
+# External push button — active low, wired from this pin to GND.
+# -pullup yes enables the iCE40's internal pull-up (~100 kΩ), so no
+# external resistor is needed.  Pin 23 = label 23B on Header C (J3).
+set_io -pullup yes btn  23   # label 23B — Header C
+
+# RGB LED (driven via SB_RGBA_DRV primitive; these are the output pads)
+set_io led_green 39   # RGB0 — green
+set_io led_blue  40   # RGB1 — blue
+set_io led_red   41   # RGB2 — red
